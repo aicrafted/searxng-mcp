@@ -36,6 +36,22 @@ Run the server using `uv` or standard python:
 python searxng_mcp.py --transport http --port 32123 --searxng http://searx.lan
 ```
 
+### Run with Docker
+
+1. **Build the image**:
+   ```bash
+   docker build -t searxng-mcp .
+   ```
+
+2. **Run the container**:
+   ```bash
+   docker run -d \
+     -p 32123:32123 \
+     -e SEARXNG_URL=http://your-searxng-instance:8080 \
+     --name searxng-mcp \
+     searxng-mcp
+   ```
+
 ### Transport Options
 - `stdio`: Standard input/output (default for some MCP clients).
 - `http`: Stateless HTTP (streamable-http).
