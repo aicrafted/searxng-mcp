@@ -133,8 +133,66 @@ async def searxng_search(
         logger.error("Search error: %s", str(e))
         return f"Error: An unexpected error occurred: {str(e)}"
 
+@mcp.tool(
+    name="searxng_get_info",
+    annotations={
+        "title": "Get SearXNG Instance Info",
+        "description": "Returns available search categories and configured engines."
+    }
+)
+async def searxng_get_info() -> str:
+    """
+    Retrieve metadata about the SearXNG instance, including enabled categories and engines.
+    
+    Returns:
+        JSON string containing the list of categories and engines.
+    """
+    # Note: SearXNG doesn't always expose a clean JSON discovery endpoint for config
+    # unless enabled in settings.yml. We'll provide the standard categories and 
+    # attempt to fetch stats if possible.
+    
+    info = {
+        "instance_url": SEARXNG_URL,
+        "standard_categories": [
+            "general", "images", "videos", "news", "it", "science", "map", "files", "music", "social_media"
+        ],
+        "message": "To use a specific category, pass it to the 'categories' parameter in searxng_search."
+    }
+    
+    # Try to fetch active engines from /stats if possible
+    try:
+        url = f"{SEARXNG_URL}/stats"
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
+            if response.status_code == 200:
+                # Basic extraction from HTML if JSON isn't available
+                import re
+                engines = re.findall(r'href="/stats\?engine=([^"]+)"', response.text)
+                if engines:
+                    info["configured_engines"] = sorted(list(set(engines)))
+    except Exception as e:
+        logger.warning(f"Could not fetch engine stats: {e}")
+        
+    return json.dumps(info, indent=2)
+
+async def check_searxng_health(url: str):
+    """Check if SearXNG is reachable."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"{url.rstrip('/')}/")
+            if response.status_code == 200:
+                logger.info("Successfully connected to SearXNG at %s", url)
+                return True
+            else:
+                logger.warning("SearXNG returned status %s at %s", response.status_code, url)
+                return False
+    except Exception as e:
+        logger.error("Could not reach SearXNG at %s: %s", url, str(e))
+        return False
+
 if __name__ == "__main__":
     import argparse
+    import asyncio
     
     parser = argparse.ArgumentParser(description="SearXNG MCP Server")
     parser.add_argument("--searxng", default=SEARXNG_URL, help="SearXNG url")
@@ -154,10 +212,15 @@ if __name__ == "__main__":
         transport = "streamable-http"
     
     logger.info("Starting SearXNG MCP Server")
+    logger.info("SearXNG URL: %s", args.searxng)
     logger.info("Transport: %s", transport)
     
     if transport != "stdio":
         logger.info("Bind address: %s:%s", args.host, args.port)
+
+    # Perform startup health check
+    if not asyncio.run(check_searxng_health(args.searxng)):
+        logger.error("Backend health check failed. Please check your SEARXNG_URL and network connectivity.")
 
     logger.info("Running in %s mode", transport)
     try:
