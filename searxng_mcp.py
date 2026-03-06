@@ -193,6 +193,7 @@ async def check_searxng_health(url: str):
 if __name__ == "__main__":
     import argparse
     import asyncio
+    import sys
     
     parser = argparse.ArgumentParser(description="SearXNG MCP Server")
     parser.add_argument("--searxng", default=SEARXNG_URL, help="SearXNG url")
@@ -221,6 +222,7 @@ if __name__ == "__main__":
     # Perform startup health check
     if not asyncio.run(check_searxng_health(args.searxng)):
         logger.error("Backend health check failed. Please check your SEARXNG_URL and network connectivity.")
+        sys.exit(1)
 
     logger.info("Running in %s mode", transport)
     try:
