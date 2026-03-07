@@ -187,7 +187,7 @@ async def check_searxng_health(url: str):
                 logger.warning("SearXNG returned status %s at %s", response.status_code, url)
                 return False
     except Exception as e:
-        logger.error("Could not reach SearXNG at %s: %s", url, str(e))
+        logger.error("Could not reach SearXNG at %s %s", url, str(e))
         return False
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+name: searxng-mcp
+
+services:
+  searxng-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: searxng-mcp:local
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
+    environment:
+      MCP_HOST: 127.0.0.1
+      MCP_PORT: "32123"
+      MCP_TRANSPORT: "http"
+    ports:
+      - "127.0.0.1:32123:32123"
+    labels:
+      - traefik.http.routers.searxng-mcp.rule=Host(`searxng-mcp.lan`)
