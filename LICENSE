@@ -1,21 +1,82 @@
-MIT License
+AI-MIT License
+Version 1.0, 2025
+https://github.com/ai-mit-license/ai-mit-license
 
-Copyright (c) 2026 Nik
+────────────────────────────────────────────────────────────
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+AUTHORSHIP DECLARATION
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  [ ] Fully AI-generated   — no human creative input; no copyright claimed
+  [*] AI-assisted          — human-directed, AI-generated output
+  [ ] Human-authored       — AI used only as a tool (e.g. autocomplete)
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  Originator : [nik-sharky, "Antigravity"]
+  AI Tool(s) : [Gemini 3 Flash (Google)]
+  Year       : [2026]
+  Repository : [https://github.com/nik-sharky/searxng-mcp]
+
+────────────────────────────────────────────────────────────
+
+GRANT OF RIGHTS
+
+Permission is hereby granted, free of charge, to any person or
+system obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to
+whom the Software is furnished to do so, subject to the
+following conditions.
+
+────────────────────────────────────────────────────────────
+
+CONDITIONS
+
+1. ATTRIBUTION
+   The above Authorship Declaration, this conditions notice,
+   and the AI-MIT License version tag must be included in all
+   copies or substantial portions of the Software.
+
+2. TRANSPARENCY
+   If the Software is redistributed or used as input for further
+   AI training, the AI origin of the code must not be
+   misrepresented as purely human-authored work.
+
+3. NO COPYRIGHT CLAIM (Fully AI-generated only)
+   When the "Fully AI-generated" box is checked, the Originator
+   makes no copyright claim over the Software. The Software is
+   dedicated to the public domain to the maximum extent
+   permitted by applicable law. Where public domain dedication
+   is not legally possible, the Originator grants a perpetual,
+   irrevocable, royalty-free license to all parties for any
+   purpose.
+
+────────────────────────────────────────────────────────────
+
+DISCLAIMERS
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED. TO THE MAXIMUM EXTENT PERMITTED BY
+APPLICABLE LAW, THE ORIGINATOR EXPRESSLY DISCLAIMS THAT:
+
+  (a) the Software is free of third-party intellectual property
+      that may have been embedded through AI training data;
+
+  (b) the Software meets the requirements of any law,
+      regulation, or framework governing AI-generated outputs
+      (including but not limited to the EU AI Act, US Executive
+      Orders on AI, or sector-specific regulations);
+
+  (c) the Authorship Declaration above is legally sufficient
+      to establish, transfer, or disclaim rights in any specific
+      jurisdiction — users are advised to seek independent legal
+      counsel for high-stakes deployments.
+
+IN NO EVENT SHALL THE ORIGINATOR BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+────────────────────────────────────────────────────────────
+
+SPDX-License-Identifier: AI-MIT-1.0
