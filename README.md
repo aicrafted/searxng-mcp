@@ -9,6 +9,34 @@ A Model Context Protocol (MCP) server that provides web search capabilities by i
 - **Stateless HTTP**: Compatible with any standard JSON-RPC client.
 - **Flexible Configuration**: Supports environment variables and command-line arguments.
 
+## Example of compose.yml to run SearXNG with MCP server 
+
+```yaml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    expose:
+      - 8080
+    volumes:
+      - ./searxng/etc/:/etc/searxng/
+      - ./searxng/data/:/var/cache/searxng/
+    restart: always
+
+  searxng-mcp:
+    image: ghcr.io/aicrafted/searxng-mcp:latest
+    restart: unless-stopped
+    depends_on:
+      # Ensure SearXNG starts before the MCP server
+      - searxng
+    environment:
+      SEARXNG_URL: http://searxng:8080
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 32123
+      MCP_TRANSPORT: "http"
+    ports:
+      - "32123:32123"
+```
+
 ## Prerequisites
 
 - Python 3.10+
