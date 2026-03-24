@@ -37,7 +37,7 @@ services:
       - "32123:32123"
 ```
 
-## Prerequisites
+## Prerequisites for run from sources
 
 - Python 3.10+
 - A running [SearXNG](https://github.com/searxng/searxng) instance.
