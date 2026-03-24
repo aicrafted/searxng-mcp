@@ -15,8 +15,8 @@ A Model Context Protocol (MCP) server that provides web search capabilities by i
 services:
   searxng:
     image: searxng/searxng:latest
-    expose:
-      - 8080
+    ports:
+      - 8080:8080
     volumes:
       - ./searxng/etc/:/etc/searxng/
       - ./searxng/data/:/var/cache/searxng/
