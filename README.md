@@ -37,6 +37,19 @@ services:
       - "32123:32123"
 ```
 
+## MCP client config
+```JSON
+{
+  "mcpServers": {
+    "searxng": {
+      "type": "http",
+      "url": "http://localhost:32123/mcp"
+    }
+  }
+}
+```
+
+
 ## Prerequisites for run from sources
 
 - Python 3.10+
