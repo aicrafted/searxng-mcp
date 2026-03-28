@@ -136,3 +136,70 @@ SearXNG can query over 130 engines. Configured engines typically include:
 
 ## Programmatic Discovery
 Use the `searxng_get_info` tool to dynamically retrieve the list of enabled categories and engines from your instance.
+
+# Windows Troubleshooting
+
+## localhost not reachable while Docker container is running
+
+**Symptom:** `http://localhost:<port>/` returns connection refused or hits the wrong service,
+but `curl` from inside the container works fine.
+
+**Root cause: WSL2 port relay ghost**
+
+WSL2 automatically forwards ports from the Linux VM to the Windows host using `wslrelay.exe`.
+When a process inside WSL listens on a port, WSL creates a relay bound to `[::1]:<port>`
+(IPv6 loopback) on the Windows side.
+
+When that WSL process stops, `wslrelay.exe` often **does not release the port**. The relay
+entry stays alive as a zombie listener on `[::1]:<port>`.
+
+Later, when Docker maps a container to the same host port, it binds correctly to
+`0.0.0.0:<port>` — but `[::1]:<port>` is already taken by the stale relay.
+
+On Windows, `localhost` resolves to `::1` (IPv6) first. So browser and curl requests to
+`localhost:<port>` hit the dead `wslrelay.exe` entry instead of the Docker container,
+resulting in a connection error or unexpected response.
+
+Connecting via the explicit IPv4 address `127.0.0.1:<port>` bypasses the relay and reaches
+Docker correctly.
+
+**How to diagnose:**
+
+```powershell
+# Check what is listening on the port
+netstat -ano | findstr :<port>
+
+# Identify the processes
+Get-Process -Id <pid1>,<pid2> | Select-Object Id,Name
+```
+
+If you see two entries for the same port — one owned by `com.docker.backend` and another
+by `wslrelay` — this is the problem.
+
+**Workarounds:**
+
+| Option | Command | Notes |
+|--------|---------|-------|
+| Use IPv4 directly | `http://127.0.0.1:<port>/` | Immediate, no restart needed |
+| Restart WSL | `wsl --shutdown` | Kills all stale relays; WSL restarts on next use |
+| Remap Docker port | Change host port in `docker run -p` or `docker-compose.yml` | Avoids the conflict entirely |
+
+**Permanent fix:**
+
+After `wsl --shutdown`, restart the Docker container. The relay will no longer exist and
+`localhost:<port>` will work normally until the same port is reused inside WSL again.
+
+**Prevention:**
+
+If you regularly run services on the same port both in WSL and in Docker, prefer one of:
+
+- Always use Docker for that service, never WSL directly
+- Use different ports for WSL dev and Docker prod instances
+- Add `127.0.0.1:<port>:<port>` explicit binding in `docker-compose.yml` to force IPv4
+
+---
+
+## Related
+
+- [WSL2 networking documentation](https://learn.microsoft.com/en-us/windows/wsl/networking)
+- WSL GitHub issue tracker: search `wslrelay port leak`
