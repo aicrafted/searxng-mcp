@@ -118,7 +118,7 @@ python searxng_mcp.py --transport http --port 32123 --searxng http://searx.lan
 
 # Search Abilities Guide
 
-SearXNG aggregates results from various sources. This guide outlines the capabilities available through the `searxng_search` tool.
+SearXNG aggregates results from various sources. This guide outlines the capabilities available through the `web_search` tool.
 
 ## Search Categories
 Categories help refine your search by content type. Use these in the `categories` parameter (comma-separated).
@@ -151,7 +151,7 @@ SearXNG can query over 130 engines. Configured engines typically include:
 - **`safesearch`**: Control content filtering (0=None, 1=Moderate, 2=Strict).
 
 ## Programmatic Discovery
-Use the `searxng_get_info` tool to dynamically retrieve the list of enabled categories and engines from your instance.
+Use the `web_search_info` tool to dynamically retrieve the list of enabled categories and engines from your instance.
 
 # Windows Troubleshooting
 
