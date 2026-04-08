@@ -38,6 +38,8 @@ services:
 ```
 
 ## MCP client config
+
+### HTTP transport (recommended)
 ```JSON
 {
   "mcpServers": {
@@ -48,6 +50,20 @@ services:
   }
 }
 ```
+
+### SSE transport
+```JSON
+{
+  "mcpServers": {
+    "searxng": {
+      "type": "sse",
+      "url": "http://localhost:32123/sse"
+    }
+  }
+}
+```
+
+> **Note:** SSE transport uses the `/sse` endpoint, not `/mcp`. HTTP transport uses `/mcp`.
 
 
 ## Prerequisites for run from sources
