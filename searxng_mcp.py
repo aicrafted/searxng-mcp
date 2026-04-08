@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize FastMCP server
-mcp = FastMCP("searxng_mcp", stateless_http=True, json_response=True, streamable_http_path="/")
+mcp = FastMCP("searxng_mcp", stateless_http=True, json_response=True, streamable_http_path="/mcp")
 
 # Configuration
 SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://localhost:8080").rstrip("/")
