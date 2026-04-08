@@ -19,7 +19,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize FastMCP server
-mcp = FastMCP("searxng_mcp", stateless_http=True, json_response=True, streamable_http_path="/mcp")
+mcp = FastMCP(
+    "searxng_mcp",
+    instructions=(
+        "This server provides web search capabilities by querying multiple search engines simultaneously. "
+        "Use the `web_search` tool to search the web across categories such as general web, news, social media, "
+        "academic/science, images, videos, IT/developer resources, and more. "
+        "You can target specific search engines, filter by language or time range, and paginate results. "
+        "Use `web_search_info` to discover available categories and engines on this instance."
+    ),
+    stateless_http=True,
+    json_response=True,
+    streamable_http_path="/mcp"
+)
 
 # Configuration
 SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://localhost:8080").rstrip("/")
@@ -52,9 +64,9 @@ class SearchInput(BaseModel):
     response_format: ResponseFormat = Field(ResponseFormat.MARKDOWN, description="Format of the tool output")
 
 @mcp.tool(
-    name="searxng_search",
+    name="web_search",
     annotations={
-        "title": "SearXNG Web Search",
+        "title": "Web Search",
         "readOnlyHint": True,
         "destructiveHint": False,
         "idempotentHint": True,
@@ -71,19 +83,25 @@ async def searxng_search(
     response_format: ResponseFormat = ResponseFormat.MARKDOWN
 ) -> str:
     """
-    Perform a web search using SearXNG.
+    Search the web using multiple search engines simultaneously.
+
+    Queries are aggregated across engines in the selected category, providing
+    broader and less biased results than any single search engine.
 
     Args:
         query: Search query
-        categories: Comma-separated list of categories (e.g., 'general,news')
-        engines: Comma-separated list of engines to use
-        language: Search language (e.g., 'en', 'es')
-        pageno: Page number (starts at 1)
-        time_range: Time range (e.g., 'day', 'month', 'year')
-        response_format: Format of the tool output (markdown or json)
+        categories: Content category to search within. Options: 'general' (default),
+            'news', 'social_media', 'science', 'it', 'images', 'videos', 'map', 'files'.
+            Comma-separate multiple values (e.g., 'news,social_media').
+        engines: Restrict to specific engines, comma-separated (e.g., 'google,wikipedia').
+            Omit to use all engines available for the selected category.
+        language: Search language code (e.g., 'en', 'de', 'fr'). Defaults to 'en'.
+        pageno: Result page number, starting at 1.
+        time_range: Limit results by age: 'day', 'month', or 'year'.
+        response_format: Output format — 'markdown' (default, human-readable) or 'json' (raw data).
 
     Returns:
-        Formatted search results or error message.
+        Aggregated search results from multiple engines, or an error message.
     """
     url = f"{SEARXNG_URL}/search"
     
@@ -134,18 +152,21 @@ async def searxng_search(
         return f"Error: An unexpected error occurred: {str(e)}"
 
 @mcp.tool(
-    name="searxng_get_info",
+    name="web_search_info",
     annotations={
-        "title": "Get SearXNG Instance Info",
-        "description": "Returns available search categories and configured engines."
+        "title": "Get Search Engine Info",
+        "description": "Returns available search categories and configured engines for this instance."
     }
 )
 async def searxng_get_info() -> str:
     """
-    Retrieve metadata about the SearXNG instance, including enabled categories and engines.
-    
+    Retrieve available search categories and configured engines for this instance.
+
+    Call this before searching if you want to know which categories or engines
+    are available, or to help the user pick the right category for their query.
+
     Returns:
-        JSON string containing the list of categories and engines.
+        JSON with available categories and a list of configured engines.
     """
     # Note: SearXNG doesn't always expose a clean JSON discovery endpoint for config
     # unless enabled in settings.yml. We'll provide the standard categories and 
