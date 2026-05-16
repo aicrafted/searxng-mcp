@@ -33,6 +33,9 @@ services:
       MCP_HOST: 0.0.0.0
       MCP_PORT: 32123
       MCP_TRANSPORT: "http"
+      MCP_ALLOWED_HOSTS: "localhost:*,127.0.0.1:*"
+      MCP_ALLOWED_ORIGINS: "http://localhost:*,http://127.0.0.1:*"
+      # MCP_DISABLE_DNS_REBINDING_PROTECTION: "true"
     ports:
       - "32123:32123"
 ```
@@ -83,6 +86,9 @@ services:
    SEARXNG_URL=http://your-searxng-instance:8080
    MCP_PORT=32123
    MCP_HOST=127.0.0.1
+   MCP_ALLOWED_HOSTS=localhost:*,127.0.0.1:*
+   MCP_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*
+   # MCP_DISABLE_DNS_REBINDING_PROTECTION=true
    ```
 
 ## Usage
@@ -113,6 +119,23 @@ python searxng_mcp.py --transport http --port 32123 --searxng http://searx.lan
 - `stdio`: Standard input/output (default for some MCP clients).
 - `http`: Stateless HTTP (streamable-http).
 - `sse`: Server-Sent Events.
+
+### DNS Rebinding Protection
+
+Recent versions of the MCP Python SDK validate `Host` and `Origin` headers for HTTP/SSE transports to protect local servers from DNS rebinding attacks. If you expose the server through Docker, a reverse proxy, or a custom domain and receive `421 Invalid Host Header`, configure the allowlist explicitly:
+
+```env
+MCP_ALLOWED_HOSTS=localhost:*,127.0.0.1:*,mcp.example.com:*
+MCP_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*,https://mcp.example.com
+```
+
+For trusted local development or when this validation is handled by another infrastructure layer, you can disable the SDK protection:
+
+```env
+MCP_DISABLE_DNS_REBINDING_PROTECTION=true
+```
+
+Use disabling sparingly; setting `MCP_ALLOWED_HOSTS` and `MCP_ALLOWED_ORIGINS` is the recommended option.
 
 ---
 

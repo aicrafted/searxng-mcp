@@ -13,10 +13,42 @@ from typing import Optional
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
 load_dotenv()
+
+# Configuration
+SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://localhost:8080").rstrip("/")
+DEFAULT_PORT = int(os.environ.get("MCP_PORT", "8000"))
+DEFAULT_HOST = os.environ.get("MCP_HOST", "127.0.0.1")
+DEFAULT_TRANSPORT = os.environ.get("MCP_TRANSPORT", "stdio").lower()
+
+
+def _parse_csv_env(name: str) -> list[str]:
+    return [item.strip() for item in os.environ.get(name, "").split(",") if item.strip()]
+
+
+def _parse_bool_env(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _transport_security_from_env() -> TransportSecuritySettings | None:
+    if _parse_bool_env("MCP_DISABLE_DNS_REBINDING_PROTECTION"):
+        return TransportSecuritySettings(enable_dns_rebinding_protection=False)
+
+    allowed_hosts = _parse_csv_env("MCP_ALLOWED_HOSTS")
+    allowed_origins = _parse_csv_env("MCP_ALLOWED_ORIGINS")
+    if allowed_hosts or allowed_origins:
+        return TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=allowed_hosts,
+            allowed_origins=allowed_origins,
+        )
+
+    return None
+
 
 # Initialize FastMCP server
 mcp = FastMCP(
@@ -28,16 +60,13 @@ mcp = FastMCP(
         "You can target specific search engines, filter by language or time range, and paginate results. "
         "Use `web_search_info` to discover available categories and engines on this instance."
     ),
+    host=DEFAULT_HOST,
+    port=DEFAULT_PORT,
     stateless_http=True,
     json_response=True,
-    streamable_http_path="/mcp"
+    streamable_http_path="/mcp",
+    transport_security=_transport_security_from_env(),
 )
-
-# Configuration
-SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://localhost:8080").rstrip("/")
-DEFAULT_PORT = int(os.environ.get("MCP_PORT", "8000"))
-DEFAULT_HOST = os.environ.get("MCP_HOST", "127.0.0.1")
-DEFAULT_TRANSPORT = os.environ.get("MCP_TRANSPORT", "stdio").lower()
 
 # Configure logging
 logging.basicConfig(
