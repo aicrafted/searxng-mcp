@@ -16,10 +16,10 @@ services:
   searxng:
     image: searxng/searxng:latest
     ports:
-      - 8080:8080
+      - "${SEARXNG_PORT:-8080}:8080"
     volumes:
-      - ./searxng/etc/:/etc/searxng/
-      - ./searxng/data/:/var/cache/searxng/
+      - "${SEARXNG_VOL_CONFIG:-searxng-config}:/etc/searxng/"
+      - "${SEARXNG_VOL_DATA:-searxng-data}:/var/cache/searxng/"
     restart: always
 
   searxng-mcp:
@@ -29,15 +29,50 @@ services:
       # Ensure SearXNG starts before the MCP server
       - searxng
     environment:
-      SEARXNG_URL: http://searxng:8080
-      MCP_HOST: 0.0.0.0
-      MCP_PORT: 32123
-      MCP_TRANSPORT: "http"
-      MCP_ALLOWED_HOSTS: "localhost:*,127.0.0.1:*"
-      MCP_ALLOWED_ORIGINS: "http://localhost:*,http://127.0.0.1:*"
-      # MCP_DISABLE_DNS_REBINDING_PROTECTION: "true"
+      SEARXNG_URL: "${SEARXNG_URL:-http://searxng:8080}"
+      MCP_HOST: "${MCP_HOST:-127.0.0.1}"
+      MCP_PORT: "${MCP_PORT:-32123}"
+      MCP_TRANSPORT: "${MCP_TRANSPORT:-http}"
+      MCP_ALLOWED_HOSTS: "${MCP_ALLOWED_HOSTS:-localhost:*,127.0.0.1:*}"
+      MCP_ALLOWED_ORIGINS: "${MCP_ALLOWED_ORIGINS:-http://localhost:*,http://127.0.0.1:*}"
+      MCP_DISABLE_DNS_REBINDING_PROTECTION: "${MCP_DISABLE_DNS_REBINDING_PROTECTION:-false}"
     ports:
-      - "32123:32123"
+      - "${MCP_PORT:-32123}:${MCP_PORT:-32123}"
+
+volumes:
+  searxng-config:
+  searxng-data:
+```
+
+> **Important:** Enable JSON responses in your SearXNG `settings.yml`, otherwise the MCP server cannot read search results:
+>
+> ```yaml
+> search:
+>   formats:
+>     - html
+>     - json
+> ```
+
+### Example `.env`
+
+```env
+# SearXNG url should be visible by the MCP server inside docker, so use internal service port here
+SEARXNG_URL=http://searxng:8080
+# Public SearXNG port
+SEARXNG_PORT=8080
+# Searxng config and data volumes, start with "./" if You want to bind dir instead using volume
+SEARXNG_VOL_CONFIG=searxng-config
+SEARXNG_VOL_DATA=searxng-data
+
+# MCP server host, port and transport ("stdio", "sse", "http")
+MCP_HOST=127.0.0.1
+MCP_PORT=32123
+MCP_TRANSPORT=http
+
+# MCP DNS rebinding protection (see https://github.com/modelcontextprotocol/python-sdk/issues/1798 for details)
+MCP_ALLOWED_HOSTS=localhost:*,127.0.0.1:*
+MCP_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*
+# MCP_DISABLE_DNS_REBINDING_PROTECTION=true
 ```
 
 ## MCP client config
@@ -81,15 +116,24 @@ services:
    ```bash
    pip install -r requirements.txt
    ```
-3. Set up your `.env` file (optional):
-   ```env
-   SEARXNG_URL=http://your-searxng-instance:8080
-   MCP_PORT=32123
-   MCP_HOST=127.0.0.1
-   MCP_ALLOWED_HOSTS=localhost:*,127.0.0.1:*
-   MCP_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*
-   # MCP_DISABLE_DNS_REBINDING_PROTECTION=true
-   ```
+3. Set up your `.env` file (optional).
+
+## Configuration
+
+The server reads configuration from command-line arguments and environment variables. Command-line arguments override the corresponding defaults used at startup.
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `SEARXNG_URL` | `http://localhost:8080` | URL of the SearXNG instance. |
+| `SEARXNG_PORT` | `8080` | Public host port for the SearXNG container in the compose example. |
+| `SEARXNG_VOL_CONFIG` | `searxng-config` | Docker volume or host path mounted to `/etc/searxng/` in the compose example. |
+| `SEARXNG_VOL_DATA` | `searxng-data` | Docker volume or host path mounted to `/var/cache/searxng/` in the compose example. |
+| `MCP_HOST` | `127.0.0.1` | Host to bind for HTTP/SSE transports. Use `0.0.0.0` in Docker when publishing the port. |
+| `MCP_PORT` | `8000` | Port to bind for HTTP/SSE transports. |
+| `MCP_TRANSPORT` | `stdio` | Transport mode: `stdio`, `http`, or `sse`. |
+| `MCP_ALLOWED_HOSTS` | SDK defaults for localhost | Comma-separated allowed `Host` headers for DNS rebinding protection. |
+| `MCP_ALLOWED_ORIGINS` | SDK defaults for localhost | Comma-separated allowed `Origin` headers for DNS rebinding protection. |
+| `MCP_DISABLE_DNS_REBINDING_PROTECTION` | `false` | Set to `true` to disable the SDK DNS rebinding protection. |
 
 ## Usage
 
@@ -110,7 +154,7 @@ python searxng_mcp.py --transport http --port 32123 --searxng http://searx.lan
    ```bash
    docker run -d \
      -p 32123:32123 \
-     -e SEARXNG_URL=http://your-searxng-instance:8080 \
+     --env-file .env \
      --name searxng-mcp \
      searxng-mcp
    ```
